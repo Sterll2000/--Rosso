@@ -393,7 +393,7 @@
             </div>
 
             <div class="total-section" id="totalSection" style="display: none;">
-                Итого: <span id="totalAmount">0</span> ₽
+                Итого: <span id="totalAmount">0</span>
             </div>
 
             <button class="btn-trade" id="tradeBtn" onclick="startTrading()" style="display: none;">
@@ -434,6 +434,17 @@
     <script>
         let items = [];
         let isLocked = false;
+
+        // Format number to Russian style (1.9к, 1.9кк, etc.)
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'кк';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'к';
+            } else {
+                return num.toString();
+            }
+        }
 
         function addItem() {
             const name = document.getElementById('itemName').value.trim();
@@ -495,15 +506,15 @@
                         <div class="item-name">${item.name}</div>
                         <div class="item-type">${item.type}</div>
                         <div class="item-qty">x${item.qty}</div>
-                        <div class="item-price">${item.price.toFixed(2)} ₽</div>
-                        <div class="item-total">${item.total.toFixed(2)} ₽</div>
+                        <div class="item-price">${formatNumber(item.price)}</div>
+                        <div class="item-total">${formatNumber(item.total)}</div>
                         <button class="btn-remove" onclick="removeItem(${item.id})">✕</button>
                     </div>
                 `;
             });
 
             list.innerHTML = html;
-            document.getElementById('totalAmount').textContent = total.toFixed(2);
+            document.getElementById('totalAmount').textContent = formatNumber(total);
             totalSection.style.display = 'block';
             tradeBtn.style.display = 'block';
         }
@@ -531,8 +542,8 @@
                         <div class="item-name">${item.name}</div>
                         <div class="item-type">${item.type}</div>
                         <div class="item-qty">x${item.qty}</div>
-                        <div class="item-price">${item.price.toFixed(2)} ₽</div>
-                        <div class="item-total">${item.total.toFixed(2)} ₽</div>
+                        <div class="item-price">${formatNumber(item.price)}</div>
+                        <div class="item-total">${formatNumber(item.total)}</div>
                         <span class="status-badge ${statusBadge}">${statusText}</span>
                     </div>
                 `;
