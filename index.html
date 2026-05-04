@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Трекер торговли</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .input-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: #667eea;
+            color: white;
+            height: 42px;
+        }
+
+        .btn-add:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .items-list {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .item-row .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-row .item-type {
+            font-size: 12px;
+            color: #666;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .item-row .item-qty {
+            text-align: center;
+            color: #555;
+        }
+
+        .item-row .item-price {
+            text-align: right;
+            color: #555;
+        }
+
+        .item-row .item-total {
+            text-align: right;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        .total-section {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .btn-trade {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-trade:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Trading Mode Styles */
+        .trading-mode {
+            display: none;
+        }
+
+        .trading-mode.active {
+            display: block;
+        }
+
+        .add-mode {
+            display: block;
+        }
+
+        .add-mode.hidden {
+            display: none;
+        }
+
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .trade-title {
+            font-size: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .lock-btn {
+            background: #ffc107;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .lock-btn:hover {
+            background: #e0a800;
+        }
+
+        .trade-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e9ecef;
+            position: relative;
+        }
+
+        .trade-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .trade-item.sold {
+            background: #d4edda;
+            border-color: #28a745;
+            opacity: 0.7;
+        }
+
+        .trade-item.sold .item-name {
+            color: #155724;
+        }
+
+        .trade-item.not-sold {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .trade-item.not-sold .item-name {
+            color: #721c24;
+        }
+
+        .trade-item.locked {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-sold {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-not-sold {
+            background: #dc3545;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-value.green {
+            color: #28a745;
+        }
+
+        .stat-value.red {
+            color: #dc3545;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .form-row, .item-row, .trade-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .item-row > div, .trade-item > div {
+                text-align: left !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Add Mode -->
+        <div class="add-mode" id="addMode">
+            <h1>📦 Трекер торговли</h1>
+            
+            <div class="input-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Название предмета</label>
+                        <input type="text" id="itemName" placeholder="Введите название">
+                    </div>
+                    <div class="form-group">
+                        <label>Тип</label>
+                        <select id="itemType">
+                            <option value="ларец">Ларец</option>
+                            <option value="скин">Скин</option>
+                            <option value="аксессуар">Аксессуар</option>
+                            <option value="прочее">Прочее</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Количество</label>
+                        <input type="number" id="itemQty" placeholder="x1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Цена за шт.</label>
+                        <input type="number" id="itemPrice" placeholder="0" min="0" step="0.01">
+                    </div>
+                    <button class="btn-add" onclick="addItem()">Добавить</button>
+                </div>
+            </div>
+
+            <div class="items-list" id="itemsList">
+                <div style="text-align: center; color: #999; padding: 40px;">
+                    Список предметов пуст. Добавьте предметы выше.
+                </div>
+            </div>
+
+            <div class="total-section" id="totalSection" style="display: none;">
+                Итого: <span id="totalAmount">0</span> ₽
+            </div>
+
+            <button class="btn-trade" id="tradeBtn" onclick="startTrading()" style="display: none;">
+                🛒 Торговать
+            </button>
+        </div>
+
+        <!-- Trading Mode -->
+        <div class="trading-mode" id="tradingMode">
+            <div class="trade-header">
+                <div class="trade-title">📊 Режим торговли</div>
+                <button class="lock-btn" onclick="resetAllStatus()">
+                    🔓 Сбросить все
+                </button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Всего предметов</div>
+                    <div class="stat-value" id="totalCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Продано</div>
+                    <div class="stat-value green" id="soldCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Осталось</div>
+                    <div class="stat-value red" id="remainingCount">0</div>
+                </div>
+            </div>
+
+            <div id="tradeItemsList"></div>
+
+            <button class="back-btn" onclick="backToAdd()">← Вернуться к добавлению</button>
+        </div>
+    </div>
+
+    <script>
+        let items = [];
+        let isLocked = false;
+
+        function addItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const type = document.getElementById('itemType').value;
+            const qty = parseInt(document.getElementById('itemQty').value) || 1;
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+
+            if (!name) {
+                alert('Введите название предмета!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                name: name,
+                type: type,
+                qty: qty,
+                price: price,
+                total: qty * price,
+                sold: false
+            };
+
+            items.push(item);
+            renderItems();
+            clearInputs();
+        }
+
+        function clearInputs() {
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQty').value = '';
+            document.getElementById('itemPrice').value = '';
+            document.getElementById('itemName').focus();
+        }
+
+        function removeItem(id) {
+            items = items.filter(item => item.id !== id);
+            renderItems();
+        }
+
+        function renderItems() {
+            const list = document.getElementById('itemsList');
+            const totalSection = document.getElementById('totalSection');
+            const tradeBtn = document.getElementById('tradeBtn');
+
+            if (items.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">Список предметов пуст. Добавьте предметы выше.</div>';
+                totalSection.style.display = 'none';
+                tradeBtn.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            items.forEach(item => {
+                total += item.total;
+                html += `
+                    <div class="item-row">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-type">${item.type}</div>
+                        <div class="item-qty">x${item.qty}</div>
+                        <div class="item-price">${item.price.toFixed(2)} ₽</div>
+                        <div class="item-total">${item.total.toFixed(2)} ₽</div>
+                        <button class="btn-remove" onclick="removeItem(${item.id})">✕</button>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+            document.getElementById('totalAmount').textContent = total.toFixed(2);
+            totalSection.style.display = 'block';
+            tradeBtn.style.display = 'block';
+        }
+
+        function startTrading() {
+            document.getElementById('addMode').classList.add('hidden');
+            document.getElementById('tradingMode').classList.add('active');
+            renderTradeItems();
+            updateStats();
+        }
+
+        function renderTradeItems() {
+            const list = document.getElementById('tradeItemsList');
+            let html = '';
+
+            items.forEach(item => {
+                const statusClass = item.sold ? 'sold' : 'not-sold';
+                const statusText = item.sold ? 'Продано ✓' : 'Не продано ✕';
+                const statusBadge = item.sold ? 'status-sold' : 'status-not-sold';
+                
+                html += `
+                    <div class="trade-item ${statusClass} ${isLocked ? 'locked' : ''}" 
+                         onclick="toggleSold(${item.id})" 
+                         id="item-${item.id}">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-type">${item.type}</div>
+                        <div class="item-qty">x${item.qty}</div>
+                        <div class="item-price">${item.price.toFixed(2)} ₽</div>
+                        <div class="item-total">${item.total.toFixed(2)} ₽</div>
+                        <span class="status-badge ${statusBadge}">${statusText}</span>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        function toggleSold(id) {
+            if (isLocked) return;
+            
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.sold = !item.sold;
+                renderTradeItems();
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            const total = items.length;
+            const sold = items.filter(i => i.sold).length;
+            const remaining = total - sold;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('soldCount').textContent = sold;
+            document.getElementById('remainingCount').textContent = remaining;
+        }
+
+        function resetAllStatus() {
+            if (confirm('Сбросить статусы всех предметов?')) {
+                items.forEach(item => item.sold = false);
+                renderTradeItems();
+                updateStats();
+            }
+        }
+
+        function backToAdd() {
+            document.getElementById('tradingMode').classList.remove('active');
+            document.getElementById('addMode').classList.remove('hidden');
+            isLocked = false;
+        }
+
+        // Enter key support
+        document.getElementById('itemPrice').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addItem();
+        });
+    </script>
+</body>
+</html>
